@@ -1,0 +1,13 @@
+{
+  "network": "sepolia",
+  "contracts": {
+    "YieldRouter": "0xfCFF84BE5680300cf05542F0d2fe0b69A1888071",
+    "Treasury": "0x3D3E66D075630410c442Ab5b145E4e5a5E64F1D5",
+    "Tokens": {
+      "USDC": "0xDA5e0021135cEf939C16186e09887391cd214c49",
+      "DAI": "0x8E459c6ED35FcC02D76322f695afbAa5C3bAFa9A",
+      "USDT": "0xf6008900Cbbf56F3886C9cb58fAaC3B5c293298A"
+    }
+  },
+  "timestamp": "2025-08-18T17:07:19.100Z"
+}

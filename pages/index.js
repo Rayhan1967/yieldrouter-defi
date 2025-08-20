@@ -1,4 +1,4 @@
-// pages/index.js
+// pages/index.js - Complete Final Version
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { 
@@ -35,6 +35,7 @@ export default function Home() {
   const [web3auth, setWeb3auth] = useState(null);
   const [provider, setProvider] = useState(null);
   const [solanaConnection, setSolanaConnection] = useState(null);
+  const [initializingWeb3Auth, setInitializingWeb3Auth] = useState(true);
   const [deployForm, setDeployForm] = useState({
     token: 'SOL',
     amount: '',
@@ -42,11 +43,11 @@ export default function Home() {
     targetChain: 'Solana'
   });
 
-  // Solana tokens untuk testnet
+  // Token addresses for Solana
   const SOLANA_TOKENS = {
     'SOL': 'So11111111111111111111111111111111111111112',
     'USDC': 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    'RAY': 'Raydium token address', // Add real addresses
+    'RAY': '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
   };
 
   const TOKEN_DECIMALS = {
@@ -56,15 +57,25 @@ export default function Home() {
   };
 
   const MINIMUM_DEPOSITS = {
-    'SOL': 0.1,    // 0.1 SOL
-    'USDC': 10,    // 10 USDC
-    'RAY': 100,    // 100 RAY
+    'SOL': 0.1,    
+    'USDC': 10,    
+    'RAY': 100,    
   };
+
+  // Debug Environment Variables
+  useEffect(() => {
+    console.log('🔍 Debug Environment Variables:');
+    console.log('Client ID:', process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID ? 'Present' : 'Missing');
+    console.log('Solana RPC:', process.env.NEXT_PUBLIC_SOLANA_RPC_URL);
+  }, []);
 
   // Initialize Web3Auth and Solana connection
   useEffect(() => {
     const init = async () => {
       try {
+        setInitializingWeb3Auth(true);
+        console.log('🔄 Initializing Web3Auth...');
+        
         const web3authInstance = await initWeb3Auth();
         setWeb3auth(web3authInstance);
         
@@ -76,9 +87,14 @@ export default function Home() {
           setProvider(web3authInstance.provider);
           await getUserInfo(web3authInstance);
         }
+        
+        console.log('✅ Web3Auth initialized successfully');
+        toast.success('🚀 Wallet SDK ready');
       } catch (error) {
-        console.error('Failed to initialize Web3Auth:', error);
-        toast.error('Failed to initialize wallet connection');
+        console.error('❌ Failed to initialize Web3Auth:', error);
+        toast.error(`Failed to initialize wallet: ${error.message}`);
+      } finally {
+        setInitializingWeb3Auth(false);
       }
     };
     init();
@@ -90,7 +106,9 @@ export default function Home() {
       'Raydium-SOL': 12.4,
       'Orca-USDC': 8.7,
       'Jupiter-RAY': 15.2,
-      'Marinade-SOL': 7.8
+      'Marinade-SOL': 7.8,
+      'Orca-SOL': 9.3,
+      'Raydium-USDC': 11.1
     });
   }, []);
 
@@ -107,32 +125,49 @@ export default function Home() {
         
         // Get Solana balance
         if (solanaConnection) {
-          const publicKey = new PublicKey(accounts[0]);
-          const balance = await solanaConnection.getBalance(publicKey);
-          setBalance(balance / 1e9); // Convert lamports to SOL
+          try {
+            const publicKey = new PublicKey(accounts[0]);
+            const balance = await solanaConnection.getBalance(publicKey);
+            setBalance(balance / 1e9); // Convert lamports to SOL
+          } catch (balanceError) {
+            console.error('Failed to get balance:', balanceError);
+            setBalance(0);
+          }
         }
         
-        toast.success(`Welcome ${userInfo.name || 'User'}! Wallet connected via ${userInfo.typeOfLogin}`);
+        toast.success(`Welcome ${userInfo.name || 'User'}! Connected via ${userInfo.typeOfLogin}`);
       }
     } catch (error) {
       console.error('Failed to get user info:', error);
+      toast.error('Failed to get user info');
     }
   };
 
   const connectWallet = async () => {
     if (!web3auth) {
-      toast.error('Web3Auth not initialized yet');
+      toast.error('Web3Auth not initialized yet. Please wait...');
       return;
     }
 
     try {
       setLoading(true);
+      console.log('🔄 Attempting to connect via Web3Auth...');
+      
       const web3authProvider = await web3auth.connect();
       setProvider(web3authProvider);
       await getUserInfo(web3auth);
+      
+      toast.success('🎉 Wallet connected successfully!');
     } catch (error) {
-      console.error('Login failed:', error);
-      toast.error('Failed to connect wallet');
+      console.error('❌ Login failed:', error);
+      
+      if (error.message?.includes('User closed the modal') || 
+          error.message?.includes('User cancelled') ||
+          error.message?.includes('user rejected')) {
+        toast.error('💭 Login cancelled by user');
+      } else {
+        toast.error(`Failed to connect wallet: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -147,7 +182,8 @@ export default function Home() {
       setIsConnected(false);
       setWalletAddress('');
       setBalance(0);
-      toast.success('Wallet disconnected');
+      setStrategies([]);
+      toast.success('🔓 Wallet disconnected');
     } catch (error) {
       console.error('Logout failed:', error);
       toast.error('Failed to disconnect wallet');
@@ -175,22 +211,20 @@ export default function Home() {
 
     try {
       setLoading(true);
-      toast.loading('Deploying strategy on Solana...');
+      toast.loading('🚀 Deploying strategy on Solana...');
 
       // Simulate Solana transaction
-      // In real implementation, you'd interact with Solana programs
       const mockTransaction = {
-        signature: 'mock_signature_' + Date.now(),
+        signature: 'mock_sol_' + Math.random().toString(36).substr(2, 9),
         amount: inputAmount,
         token: deployForm.token,
         protocol: deployForm.protocol,
         timestamp: new Date().toISOString()
       };
 
-      // Simulate delay for blockchain transaction
+      // Simulate blockchain delay
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // Add to strategies
       const newStrategy = {
         id: Date.now().toString(),
         protocol: deployForm.protocol,
@@ -200,13 +234,14 @@ export default function Home() {
         chain: 'Solana',
         rewards: 0,
         status: 'Active',
-        signature: mockTransaction.signature
+        signature: mockTransaction.signature,
+        deployedAt: new Date().toLocaleDateString()
       };
 
       setStrategies(prev => [...prev, newStrategy]);
       
       toast.dismiss();
-      toast.success(`🎉 Strategy deployed on Solana! Signature: ${mockTransaction.signature.slice(0, 8)}...`);
+      toast.success(`🎉 Strategy deployed on Solana! Tx: ${mockTransaction.signature.slice(0, 8)}...`);
       
       setDeployForm({
         token: 'SOL',
@@ -232,15 +267,17 @@ export default function Home() {
 
     try {
       setLoading(true);
-      toast.loading('Harvesting rewards from Solana...');
+      toast.loading('🌾 Harvesting rewards from Solana...');
       
-      // Simulate reward harvest
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Update strategy rewards
       setStrategies(prev => prev.map(strategy => 
         strategy.id === strategyId 
-          ? { ...strategy, rewards: strategy.rewards + (strategy.amount * strategy.apy / 100 / 12) }
+          ? { 
+              ...strategy, 
+              rewards: strategy.rewards + (strategy.amount * strategy.apy / 100 / 12),
+              lastHarvest: new Date().toLocaleDateString()
+            }
           : strategy
       ));
       
@@ -250,7 +287,11 @@ export default function Home() {
     } catch (error) {
       console.error('Harvest failed:', error);
       toast.dismiss();
-      toast.error(`Harvest failed: ${error.message}`);
+      if (error.code === 4001 || error.message?.includes('user rejected')) {
+        toast.error('💭 Transaction cancelled by user');
+      } else {
+        toast.error(`Harvest failed: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -258,13 +299,31 @@ export default function Home() {
 
   const renderDashboard = () => (
     <div className="space-y-6 animate-fade-in">
+      {/* Debug Info Panel */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <span className="font-medium">Initializing:</span> {initializingWeb3Auth ? 'Yes' : 'No'}
+          </div>
+          <div>
+            <span className="font-medium">Web3Auth Ready:</span> {web3auth ? 'Yes' : 'No'}
+          </div>
+          <div>
+            <span className="font-medium">Connected:</span> {isConnected ? 'Yes' : 'No'}
+          </div>
+          <div>
+            <span className="font-medium">Client ID:</span> {process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID ? 'Set' : 'Missing'}
+          </div>
+        </div>
+      </div>
+
       {/* Web3Auth Status */}
       {isConnected && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center">
             <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
             <p className="text-green-800">
-              ✅ Connected via Web3Auth on Solana Devnet
+              ✅ Connected via Web3Auth on Solana Devnet: {walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}
             </p>
           </div>
         </div>
@@ -350,7 +409,7 @@ export default function Home() {
                       </p>
                       {strategy.signature && (
                         <p className="text-xs text-blue-600">
-                          Tx: {strategy.signature.slice(0, 12)}...
+                          Tx: {strategy.signature.slice(0, 12)}... | {strategy.deployedAt}
                         </p>
                       )}
                     </div>
@@ -360,6 +419,9 @@ export default function Home() {
                     <p className="text-gray-600 text-sm">
                       +{(strategy.rewards || 0).toFixed(4)} {strategy.token} rewards
                     </p>
+                    {strategy.lastHarvest && (
+                      <p className="text-xs text-gray-500">Last: {strategy.lastHarvest}</p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
@@ -387,7 +449,7 @@ export default function Home() {
           </h2>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(yieldRates).map(([key, rate]) => {
               const [protocol, token] = key.split('-');
               return (
@@ -465,7 +527,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Minimum Deposit Info */}
         <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
           <div className="flex items-center mb-2">
             <Info className="w-5 h-5 text-purple-600 mr-2" />
@@ -604,6 +665,29 @@ export default function Home() {
     </div>
   );
 
+  const renderPortfolio = () => (
+    <div className="bg-white rounded-xl shadow-sm border p-6 animate-fade-in">
+      <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <Coins className="w-5 h-5 mr-2 text-purple-600" />
+        Portfolio Analytics (Coming Soon)
+      </h2>
+      <div className="text-center py-12">
+        <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <p className="text-gray-600 mb-2">Cross-chain portfolio analytics with Solana and Ethereum integration.</p>
+        <p className="text-gray-500 text-sm">Track your DeFi performance across multiple chains</p>
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-medium text-gray-800 mb-2">Coming Features:</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• Multi-chain asset tracking</li>
+            <li>• Performance analytics and ROI calculations</li>
+            <li>• Risk assessment and diversification insights</li>
+            <li>• Automated rebalancing suggestions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <Head>
@@ -660,11 +744,18 @@ export default function Home() {
                 {!isConnected ? (
                   <button
                     onClick={connectWallet}
-                    disabled={loading}
+                    disabled={loading || initializingWeb3Auth || !web3auth}
                     className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center disabled:opacity-50"
                   >
                     <Wallet className="w-4 h-4 mr-2" />
-                    {loading ? 'Connecting...' : 'Login with Web3Auth'}
+                    {loading 
+                      ? 'Connecting...' 
+                      : initializingWeb3Auth 
+                        ? 'Initializing...'
+                        : !web3auth
+                          ? 'SDK Loading...'
+                          : 'Login with Web3Auth'
+                    }
                   </button>
                 ) : (
                   <div className="flex items-center space-x-3">
@@ -693,12 +784,24 @@ export default function Home() {
               <div className="space-y-4">
                 <button
                   onClick={connectWallet}
-                  disabled={loading}
+                  disabled={loading || initializingWeb3Auth || !web3auth}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  {loading ? 'Connecting...' : '🔐 Login with Social Account'}
+                  {loading 
+                    ? 'Connecting...' 
+                    : initializingWeb3Auth 
+                      ? 'Initializing SDK...'
+                      : !web3auth
+                        ? 'Loading...'
+                        : '🔐 Login with Social Account'
+                  }
                 </button>
-                <p className="text-sm text-gray-500">Powered by Web3Auth embedded wallets on Solana</p>
+                <p className="text-sm text-gray-500">
+                  {initializingWeb3Auth 
+                    ? 'Initializing Web3Auth SDK...' 
+                    : 'Powered by Web3Auth embedded wallets on Solana'
+                  }
+                </p>
               </div>
             </div>
           ) : (
@@ -730,19 +833,7 @@ export default function Home() {
               {activeTab === 'dashboard' && renderDashboard()}
               {activeTab === 'strategies' && renderStrategies()}
               {activeTab === 'bridge' && renderBridge()}
-              {activeTab === 'portfolio' && (
-                <div className="bg-white rounded-xl shadow-sm border p-6 animate-fade-in">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    <Coins className="w-5 h-5 mr-2 text-purple-600" />
-                    Portfolio Analytics (Coming Soon)
-                  </h2>
-                  <div className="text-center py-12">
-                    <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-600">Cross-chain portfolio analytics with Solana and Ethereum integration.</p>
-                    <p className="text-gray-500 text-sm mt-2">Track your DeFi performance across multiple chains</p>
-                  </div>
-                </div>
-              )}
+              {activeTab === 'portfolio' && renderPortfolio()}
             </div>
           )}
         </div>

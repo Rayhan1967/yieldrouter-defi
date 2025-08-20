@@ -1,1 +1,56 @@
-{}
+{
+  "node_modules/@web3auth/ui/dist/index.js -> ./dutch-DA4bfNTp.js": {
+    "id": 298,
+    "files": [
+      "static/chunks/298.780d773448ad2bcd.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./french-C9hScp8b.js": {
+    "id": 7973,
+    "files": [
+      "static/chunks/973.cd7d271871e0f152.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./german-BhRxrMye.js": {
+    "id": 2564,
+    "files": [
+      "static/chunks/564.ae84299174c14bdf.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./japanese-Bvuydikq.js": {
+    "id": 5681,
+    "files": [
+      "static/chunks/681.953316b4efcd0bc7.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./korean-M7bd51ut.js": {
+    "id": 5656,
+    "files": [
+      "static/chunks/656.e881c916222d3ca1.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./mandarin-CYSJAgXi.js": {
+    "id": 9983,
+    "files": [
+      "static/chunks/983.dbbb2e7849d36b74.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./portuguese-CZTBs7Nm.js": {
+    "id": 8750,
+    "files": [
+      "static/chunks/750.af1c05ac795bcc79.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./spanish-Bji0Db1n.js": {
+    "id": 6125,
+    "files": [
+      "static/chunks/125.42e77d881a5cf478.js"
+    ]
+  },
+  "node_modules/@web3auth/ui/dist/index.js -> ./turkish-BD7WDb-q.js": {
+    "id": 5017,
+    "files": [
+      "static/chunks/17.4f67f5e6fb261ce1.js"
+    ]
+  }
+}

@@ -1,14 +1,7 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    unoptimized: true
-  },
-  // For static export (optional)
-  output: 'export',
-  trailingSlash: true,
-  distDir: 'out'
+  // Remove deprecated swcMinify option
 }
 
 module.exports = nextConfig

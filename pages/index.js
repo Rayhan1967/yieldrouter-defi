@@ -160,7 +160,6 @@ export default function Home() {
       toast.success('🎉 Wallet connected successfully!');
     } catch (error) {
       console.error('❌ Login failed:', error);
-      
       if (error.message?.includes('User closed the modal') || 
           error.message?.includes('User cancelled') ||
           error.message?.includes('user rejected')) {

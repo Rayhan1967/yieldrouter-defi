@@ -1,13 +1,49 @@
-# Sample Hardhat Project
+YieldRouter — DeFi Yield Strategies on Solana with Web3Auth
+Frictionless DeFi onboarding with social login. YieldRouter lets users connect with Web3Auth (no seed phrase), and deploy yield strategies on Solana in seconds.
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+Social login via Web3Auth (Google, email, etc.)
 
-Try running some of the following tasks:
+Fast and low-fee transactions on Solana Devnet
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.js
-```
+Clean Next.js frontend with Tailwind and react-hot-toast
+
+Built for simple demo and extensible to production
+
+Tech Stack
+Next.js 15, React 18
+
+Tailwind CSS, Lucide Icons, react-hot-toast
+
+Web3Auth (modal + openlogin-adapter + solana-provider)
+
+Solana Web3.js
+
+Node.js 16/18 recommended
+
+Live Demo
+Vercel: your-vercel-url-here
+
+Network: Solana Devnet
+
+Roadmap
+Add real strategy execution via Solana programs
+
+Integrate protocols (Raydium/Orca/Jupiter) with transactions
+
+Add portfolio analytics, cross-chain bridge
+
+Switch to mainnet with production Web3Auth config
+
+Security Notes
+
+For production, review wallet and transaction signing flows
+
+License
+MIT
+
+Acknowledgements
+Web3Auth for social login and embedded wallets
+
+Solana community and tooling ecosystem
+
+Next.js, Tailwind, Vercel for streamlined DX

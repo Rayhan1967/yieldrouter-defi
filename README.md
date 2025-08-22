@@ -16,12 +16,8 @@ Tailwind CSS, Lucide Icons, react-hot-toast
 
 Web3Auth (modal + openlogin-adapter + solana-provider)
 
-Solana Web3.js
-
-Node.js 16/18 recommended
-
 Live Demo
-Vercel: your-vercel-url-here
+Vercel: https://yieldrouterdefi.vercel.app/
 
 Network: Solana Devnet
 
